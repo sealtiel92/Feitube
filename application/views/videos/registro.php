@@ -1,13 +1,11 @@
-<body>
-  
-<div id="contenedor-global">
-  <div id="contenido">
-    <div id="principal-video">
+<div class="contenedor-global">
+  <div class="contenido">
+    <div class="principal-video">
       <h1>Registro</h1>
     </div>
-    <div id="campos-registro">
-      <div id="contenedor-publicidad"><img src="<?= base_url()?>assets/images/GlobalVideo.jpg" alt=""/></div>
-      <div id="contenedor-datos">
+    <div class="campos-registro">
+      <div class="contenedor-publicidad"><img src="<?= base_url()?>assets/images/GlobalVideo.jpg" alt=""/></div>
+      <div class="contenedor-datos">
         <h3>datos registro</h3>
         <form action="<?= base_url()."videos/registro"?>" method="POST" accept-charset="utf-8">
           <input type="text" name="first_name" value="" placeholder="Nombre"  class="medio form-control"/>

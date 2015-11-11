@@ -31,7 +31,7 @@
 		float: middle;
 		width: 100%;
 		padding: 2.5% 2.5% 2.5% 2.5%;
-		margin-: 2.5% 2.5% 2.5% 2.5%;
+		margin: 2.5% 2.5% 2.5% 2.5%;
 	}
 	#contenido #secundario {
 		text-align: justify;
@@ -73,80 +73,7 @@
 	}
 }
 @media(min-width: 1280px){
-	#contenedor-global {
-	background-color: #5700FF;
-	width: 100%;
-	}
-	#contenido {
-	  background-color: #000AFF;
-	  position: static;
-	  width: 90%;
-	  padding: 2.5% 2.5% 2.5% 2.5%;
-	  margin: 2.5% 2.5% 2.5% 2.5%;
-	}
-	#contenido #principal-video {
-		background-color: #0068FF;
-		word-wrap: break-word;
-		float: middle;
-		width: 100%;
-		padding: 1% 1% 1% 1%;
-		margin: 1% 1% 1% 1%;
-	}
-	.video-js{
-		float: middle;
-		width: 70%;
-		padding: 2.5% 2.5% 2.5% 2.5%;
-		margin-: 2.5% 2.5% 2.5% 2.5%;
-		height: auto;
-	}
-	#contenido #mas-videos {
-		text-align: justify;
-		word-wrap: break-word;
-		background-color: #00AEFF;
-		float: right;
-		width: 26%;
-		position: static;
-		left: 70%;
-		padding: 1% 1% 1% 1%;
-		margin: 1% 1% 1% 1%;
-	}
-	#contenido #comentarios-video {
-		word-wrap: break-word;
-		background-color: #0EFFF5;
-		float: left;
-		width: 70%;
-		right: 30%;
-		padding: 1% 1% 1% 1%;
-		margin: 1% 1% 1% 1%;
-	}
-	#pie {
-	  clear: both;
-	  background-color: #00FFAC;
-	  text-align: center;
-	}
-	#principal-video #campos-registro {
-		word-wrap: break-word;
-		float: middle;
-		background-color: #00FF6F;
-		width: 100%;
-		padding: 1% 1% 1% 1%;
-		margin-: 1% 1% 1% 1%;
-	}
-	#campos-registro #contenedor-publicidad{
-		width: 50%;
-		background-color: #12F334;
-		float: left;
-		padding: 1% 1% 1% 1%;
-		margin-: 1% 1% 1% 1%;
-	}
-	#campos-registro #contenedor-datos{
-		text-align: left;
-		width: 50%;
-		background-color: #0DEB44;
-		float: right;
-		padding: 1% 1% 1% 1%;
-		margin-: 1% 1% 1% 1%;
-	}
+
 	label{
 		padding: 1% 1% 1% 1%;
 		margin: 1% 1% 1% 1%;
@@ -171,5 +98,22 @@
 	}
 	.error{
 		color:#FF0000;
+	}
+	#inicio{
+		width: 30%;
+		height: 250px;
+		background-color: #E7E7E7;
+		padding: 10px 10px;
+		margin: auto;
+	}
+	#inicio, #login{
+		text-align: center;
+		padding: 20px, 20px;
+		margin:  20px, 20px;
+	}
+	#space{
+		background-color: #1A12DD;
+		width: 100%;
+		height: 400px;
 	}
 }

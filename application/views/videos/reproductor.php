@@ -1,6 +1,6 @@
-<div id="contenedor-global">
-  <div id="contenido">
-    <div id="principal-video">
+<div class="contenedor-global">
+  <div class="contenido">
+    <div class="principal-video">
       <video id="video" controls="" preload="auto" width="auto" height="auto" 
       poster="<?= base_url()?>public/images/tumblr.gif" data-setup="{customControlsOnMobile: true}" 
       class="video-js vjs-default-skin">
@@ -12,7 +12,7 @@
         </p><a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
       </video>
     </div>
-    <div id="comentarios-video">
+    <div class="comentarios-video">
       <p>
         etdumkygvlbsdhfpsduhgdhusdghusdg
         etdumkygvlbsdhfpsduhgdhusdghusdg
@@ -23,7 +23,7 @@
         tdumkygvlbsdhfpsduhgdhusdghusdgg
       </p>
     </div>
-    <div id="mas-videos">
+    <div class="mas-videos">
       <p>
         etdumkygvlbsdhfpsduhgdhusdghusdg
         etdumkygvlbsdhfpsduhgdhusdghusdg

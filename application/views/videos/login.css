@@ -1,0 +1,12 @@
+@media(min-width: 0px) and (max-width: 1279px){
+	html{
+		resize:none;
+	}
+
+	.inicio{
+		background: #077DF2;
+		padding: 10px, 10px;
+		margin: 10px, 10px;
+	}
+
+}
