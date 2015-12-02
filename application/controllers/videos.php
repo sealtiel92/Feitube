@@ -1,10 +1,25 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Videos
+ * @uses ion-auth
+ * @framework CodeIgniter 
+ * @version 2.X
+ * @author Sealtiel Huerta
+ *
+ * Description: Controlador de Feitube
+ */
+
 class Videos extends CI_Controller {
 
+/**
+ * Constructor
+ **/
+	private $servidor_sec;
 	function __construct()
 	{
 		parent::__construct();
+		$this->servidor_sec = "192.168.0.16";
 		$this->load->database();
 		$this->load->library(array('ion_auth','form_validation'));
 		$this->load->helper(array('url','language'));
@@ -12,38 +27,134 @@ class Videos extends CI_Controller {
 		$this->lang->load('auth');
 	}
 
-	// redirect if needed, otherwise display the user list
+	/**
+	* Index Muestra todos lo videos existentes
+	**/
 	function index()
 	{
 		$data['title'] = "Inicio";
 		if ($this->ion_auth->logged_in())
 		{
+			if (isset($_POST['busqueda']))
+			{
+				$videos = $this->ion_auth->get_videos_busqueda($_POST['busqueda'],null);
+			}
+			else
+			{
+				$videos = $this->ion_auth->get_videos_busqueda(null, 40);
+			}
+
+			$data['videos'] = $videos;	
+			$data['ruta'] = "http://".$this->servidor_sec;
 			$this->load->view('videos/header_logout');
-			$this->load->view('videos/index');
+			$this->load->view('videos/index',$data);
+		}
+		else
+		{
+			if (isset($_POST['busqueda']))
+			{
+				$videos = $this->ion_auth->get_videos_busqueda($_POST['busqueda']);
+			}
+			else
+			{
+				$videos = $this->ion_auth->get_videos_busqueda();
+			}
+
+			$data['videos'] = $videos;	
+			$data['ruta'] = "http://".$this->servidor_sec;
+			$this->load->view('videos/header');
+			$this->load->view('videos/index',$data);
+		}
+	}
+
+	/**
+	* Muestra los video del usuario
+	**/
+	function mis_videos()
+	{
+		$data['title'] = "Inicio";
+		if ($this->ion_auth->logged_in())
+		{
+			$videos = $this->ion_auth->get_videos_user($this->ion_auth->get_user_id());
+			$data['videos'] = $videos;	
+			$data['ruta'] = "http://".$this->servidor_sec;
+			$this->load->view('videos/header_logout');
+			$this->load->view('videos/index',$data);
+		}
+		else
+		{
+			redirect('videos/login','refresh');
+		}
+	}
+
+	/**
+	* Resproductor Carga video selecionado por id
+	**/
+	function player()
+	{
+		$limit = 10;
+		if ($this->ion_auth->logged_in())
+		{
+			$id_video = $this->uri->segment(3);
+			if($id_video != null)
+			{
+				$data['video'] = $this->ion_auth->get_video($id_video);
+				$data['user'] = $this->ion_auth->get_user_id();
+				$data['videos'] = $this->ion_auth->get_videos_not_id($id_video,$limit);
+				$ruta = $this->ion_auth->get_video_ruta($id_video);
+				$data['ruta'] = "http://".$this->servidor_sec.$ruta;
+				$data['ruta_img'] = "http://".$this->servidor_sec;
+				$data['id_video'] = $id_video;
+				$this->load->view('videos/header_logout');
+				$this->load->view('videos/reproductor',$data);
+			}
+			else
+			{
+				redirect('videos/index','refresh');
+			}
+		}
+		else
+		{
+			$id_video = $this->uri->segment(3);
+			if($id_video != null)
+			{
+				$data['video'] = $this->ion_auth->get_video($id_video);
+				$data['videos'] = $this->ion_auth->get_videos_not_id($id_video,$limit);
+				$ruta = $this->ion_auth->get_video_ruta($id_video);
+				$data['ruta'] = "http://".$this->servidor_sec.$ruta;
+				$data['ruta_img'] = "http://".$this->servidor_sec;
+				$data['id_video'] = $id_video;
+				$this->load->view('videos/header');
+				$this->load->view('videos/reproductor',$data);
+			}
+			else
+			{
+				redirect('videos/index','refresh');
+			}
+		}
+	}
+
+	/**
+	* Carga vista del streaming
+	**/
+	function  stream()
+	{
+		$data['title'] = "Stream";
+		if ($this->ion_auth->logged_in())
+		{
+			$this->load->view('videos/header_logout');
+			$this->load->view('videos/stream.html',$data);
 		}
 		else
 		{
 			$this->load->view('videos/header');
-			$this->load->view('videos/index');
+			$this->load->view('videos/stream.html',$data);
 		}
 	}
 
-	function player()
-	{
-
-		if ($this->ion_auth->logged_in())
-		{
-			$this->load->view('videos/header_logout');
-			$this->load->view('videos/reproductor');
-		}
-		else
-		{
-			$this->load->view('videos/header');	
-			$this->load->view('videos/reproductor');
-		}
-	}
-
-	// log the user in
+	/**
+	* pagina para iniciar session
+	**/
 	function login()
 	{
 		$this->data['title'] = "Login";
@@ -66,7 +177,8 @@ class Videos extends CI_Controller {
 			{
 				//if the login is successful
 				//redirect them back to the home page
-				$this->session->set_flashdata('message', $this->ion_auth->messages());			
+				$this->session->set_flashdata('message', $this->ion_auth->messages());
+				$_SESSION["email"] = $this->input->post('identity');
 				redirect('videos/', 'refresh');
 			}
 			else
@@ -75,7 +187,7 @@ class Videos extends CI_Controller {
 				// redirect them back to the login page
 				$this->session->set_flashdata('message', $this->ion_auth->errors());
 				$this->load->view('videos/header');
-				redirect('videos/login.html', 'refresh'); // use redirects instead of loading views for compatibility with MY_Controller libraries
+				redirect('videos/login', 'refresh'); // use redirects instead of loading views for compatibility with MY_Controller libraries
 			}
 		}
 		else
@@ -98,7 +210,9 @@ class Videos extends CI_Controller {
 		}
 	}
 
-	// log the user out
+	/**
+	* Funcion salida de usuario
+	**/
 	function logout()
 	{
 		$this->data['title'] = "Logout";
@@ -109,6 +223,9 @@ class Videos extends CI_Controller {
 		redirect('videos/', 'refresh');
 	}
 
+	/**
+	* pagina de carga de videos para el usuario
+	**/
 	function upload()
 	{
 		if ($this->ion_auth->logged_in())
@@ -118,12 +235,99 @@ class Videos extends CI_Controller {
 		}
 		else
 		{
-			$this->load->view('videos/header');	
-			$this->load->view('videos/upload');
+			redirect('videos/login', 'refresh');
+		}
+	}
+
+	/**
+	* Cargar el video al servidor secundario 
+	**/
+	function cargar_video()
+	{
+		if($this->ion_auth->logged_in())
+		{
+			$email = $this->ion_auth->get_user_email($this->ion_auth->get_user_id());
+			$dir_upload = "/opt/lampp/htdocs/videos/".$email."/";
+			$size = $_FILES["archivo"]['size'];
+			$type = $_FILES["archivo"]['type'];
+			$name = $_FILES["archivo"]['name'];
+			$find = array(" ","(",")");
+			$name = str_replace($find, '_', $name);
+			$dir_archivo = $dir_upload.$name;
+			
+			$nombre = isset($_POST['nombre']) ? $_POST['nombre'] : null;
+			$descripcion = isset($_POST['descripcion']) ? $_POST['descripcion'] : null;
+			$categoria = isset($_POST['categoria']) ? $_POST['categoria'] : null;
+
+			if(!empty($nombre)||!empty($categoria)||!empty($descripcion)||
+					strlen($descripcion)<150||strlen($nombre)<30||strlen($categoria)<30||
+				$nombre!=null||$descripcion!=null||$categoria!=null)
+			{
+				$datos = array(
+					'name_video' => $email." - ".$_POST['nombre'],
+					'date_up' => date('Y-m-d H:i:s'),
+					'desc' => $_POST['descripcion'],
+					'ruta' => '/videos/'.$email.'/'.$name,
+					'ruta_img' => '/videos/'.$email.'/'.$name.'.png',
+					'categoria' => $_POST['categoria'],
+					'users_id' => $this->ion_auth->get_user_id()
+				);
+
+				if(($_FILES["archivo"]["type"] == "video/flv")||($_FILES["archivo"]["type"] == "video/mp4")||
+					($_FILES["archivo"]["type"] == "video/avi")||($_FILES["archivo"]["type"] == "video/mpeg")||
+					($_FILES["archivo"]["type"] == "video/mov")||($_FILES["archivo"]["type"] == "video/wmv")||
+					($_FILES["archivo"]["type"] == "video/webm")||($_FILES["archivo"]["type"] == "video/ogg"))
+				{
+					if($_FILES['archivo']['size'] < 1000000000)
+					{
+						if(move_uploaded_file($_FILES['archivo']['tmp_name'], $dir_archivo))
+						{ 
+							chmod($dir_archivo, 0777);
+							set_include_path(get_include_path().PATH_SEPARATOR.'/opt/lampp/htdocs/feitube/application/libraries/phpseclib');
+							include('Net/SSH2.php');
+							include('Net/SCP.php');
+							$ssh = new Net_SSH2($this->servidor_sec,22,500);
+							if (!$ssh->login('seat', 's'))
+							{
+							    exit('Login Failed');
+							}
+							$scp = new Net_SCP($ssh);
+						    if (!$scp->put($dir_archivo, $dir_archivo, NET_SCP_LOCAL_FILE))
+						   	{
+						       throw new Exception("Failed to send file");
+						    }
+							$ssh->exec("ffmpeg -i ".$dir_archivo." -ss 00:00:01 -vframes 1 ".$dir_archivo.".png");
+							$ssh->exec("ffmpeg -i ".$dir_archivo." -strict -2 -vcodec libx264 -crf 100 ".$dir_archivo.".mp4");	
+							$ssh->exec("ffmpeg -i ".$dir_archivo." -acodec libvorbis -vcodec libtheora -ac 2 -ab 96k -ar 44100 -b:v 819200 -crf 200 ".$dir_archivo.".ogv");
+							$ssh->exec("ffmpeg -i ".$dir_archivo." -c:v libvpx -crf 20 -b:v 1M -c:a libvorbis ".$dir_archivo.".webm");
+							$this->ion_auth->insert_video($datos);
+							redirect('videos/index','refresh');
+						}
+						else
+						{
+							redirect('videos/upload','refresh');
+						}	
+					}else
+					{
+						redirect('videos/upload','refresh');
+					}
+				}else
+				{
+					redirect('videos/upload','refresh');
+				}
+			}else
+			{
+				redirect('videos/upload','refresh');
+			}
+		}else
+		{
+			redirect('videos/login','refresh');
 		}
 	}
 	
-	// create a new user
+	/**
+	* Registro crea un nuevo usuario
+	**/
 	function registro()
 	{
 		$this->data['title'] = "Registro";
@@ -137,7 +341,6 @@ class Videos extends CI_Controller {
 
 		// validate form input
 		$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'required');
-		$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'required');
 		$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique['.$tables['users'].'.email]|matches[email_confirm]');
 		$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'required');
 		$this->form_validation->set_rules('sex', $this->lang->line('create_user_validation_phone_label'), 'required');
@@ -147,13 +350,12 @@ class Videos extends CI_Controller {
 
 		if ($this->form_validation->run() == true)
 		{
-			$username = strtolower($this->input->post('first_name')) . ' ' . strtolower($this->input->post('last_name'));
+			$username = strtolower($this->input->post('first_name'));
 			$email    = strtolower($this->input->post('email'));
 			$password = $this->input->post('password');
 
 			$additional_data = array(
 				'first_name' => $this->input->post('first_name'),
-				'last_name'  => $this->input->post('last_name'),
 				'birthday'    => $this->input->post('birthday'),
 				'phone'      => $this->input->post('phone'),
 				'sex'      => $this->input->post('sex'),
@@ -165,7 +367,21 @@ class Videos extends CI_Controller {
 			// check to see if we are creating the user
 			// redirect them back to the admin page
 			$this->session->set_flashdata('message', $this->ion_auth->messages());
-			redirect("videos/reproductor", 'refresh');
+			//crear carpeta de usuario
+			// si todo es valido acepta al usuario crea carpeta local y remota para videos
+			set_include_path(get_include_path().PATH_SEPARATOR.'/opt/lampp/htdocs/feitube/application/libraries/phpseclib');
+			include('Net/SSH2.php');
+			include('Net/SCP.php');
+			$ssh = new Net_SSH2($this->servidor_sec);
+			if (!$ssh->login('seat', 's'))
+			{
+			    exit('Login Failed');
+			}
+			$ssh->exec("mkdir /opt/lampp/htdocs/videos/".$email."/");
+
+			mkdir("/opt/lampp/htdocs/videos/".$email."/",0777,true); 
+			chmod("/opt/lampp/htdocs/videos/".$email."/", 0777);
+			redirect("videos/index", 'refresh');
 		}
 		else
 		{
@@ -178,12 +394,6 @@ class Videos extends CI_Controller {
 				'id'    => 'first_name',
 				'type'  => 'text',
 				'value' => $this->form_validation->set_value('first_name'),
-			);
-			$this->data['last_name'] = array(
-				'name'  => 'last_name',
-				'id'    => 'last_name',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('last_name'),
 			);
 			$this->data['email'] = array(
 				'name'  => 'email',
@@ -227,7 +437,9 @@ class Videos extends CI_Controller {
 		}
 	}
 
-	// edit a user
+	/**
+	* Edita la informacion personal de usuario
+	**/
 	function edit_user($id)
 	{
 		$this->data['title'] = "Edit User";
@@ -378,6 +590,105 @@ class Videos extends CI_Controller {
 		$this->_render_page('auth/edit_user', $this->data);
 	}
 
+	/**
+	* Guarda comentario de un video 
+	* parametro id de video
+	**/
+	function post_comentario()
+	{
+		$postdata = file_get_contents("php://input");
+		$request = json_decode($postdata);
+		if($request->comentario!=null&&strlen($request->comentario)<150)
+		{
+			$data = array
+			(
+				'comentario' => $request->comentario,
+				'fecha' => date('Y-m-d H:i:s'),
+				'video_id_video' => $request->video_id_video
+			);
+			$id_c = $this->ion_auth->insert_comentario($data);
+			if($id_c)
+			{
+				echo $result='{"status":success}';
+			}
+			else
+			{
+				echo $result='{"status":failure}';
+			}
+		}
+	}
+
+	/**
+	* agrega like realizado por el usuario a un video
+	**/
+	function post_like()
+	{
+		$postdata = file_get_contents("php://input");
+		$request = json_decode($postdata);
+		if($request->video_id_video!=null&&$request->id_user!=null)
+		{
+			$this->ion_auth->insert_like($request->video_id_video,$request->id_user);
+		}
+	}
+	
+	/**
+	* agrega no me gusta a un video
+	**/
+	function post_not_like()
+	{
+		$postdata = file_get_contents("php://input");
+		$request = json_decode($postdata);
+		if($request->video_id_video!=null&&$request->id_user!=null)
+		{
+			$this->ion_auth->insert_not_like($request->video_id_video,$request->id_user);
+		}
+	}
+
+	/**
+	* aumenta la visita de video
+	**/
+	function post_visita()
+	{	
+		$id = $this->uri->segment(3);
+		$this->ion_auth->incrementa_visita($id);
+	}
+
+	/**
+	* manda comentarios por get
+	**/
+	function comentarios()
+	{
+		$id_video = $this->uri->segment(3);	
+		echo json_encode($this->ion_auth->get_comentarios_id($id_video));
+	}
+
+	/**
+	* Manda like de un video
+	**/
+	function get_like()
+	{
+		$id_video = $this->uri->segment(3);	
+		echo json_encode($this->ion_auth->get_likes_id($id_video,true));
+	}
+
+	/**
+	* Manda not like de un video
+	**/
+	function get_not_like()
+	{
+		$id_video = $this->uri->segment(3);	
+		echo json_encode($this->ion_auth->get_likes_id($id_video,false));
+	}
+
+	/**
+	* Manda la visitas hechas a un video
+	**/
+	function get_visitas()
+	{
+		$id_video = $this->uri->segment(3);	
+		echo json_encode($this->ion_auth->get_visitas($id_video));
+	}
+
 	function _get_csrf_nonce()
 	{
 		$this->load->helper('string');
@@ -402,7 +713,7 @@ class Videos extends CI_Controller {
 		}
 	}
 
-	function _render_page($view, $data=null, $returnhtml=false)//I think this makes more sense
+	function _render_page($view, $data=null, $returnhtml=false)
 	{
 
 		$this->viewdata = (empty($data)) ? $this->data: $data;

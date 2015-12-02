@@ -16,7 +16,7 @@
 | environments.
 |
 */
-$config['base_url'] = 'http://localhost/feitube';
+$config['base_url'] = 'http://192.168.0.14/feitube';
 
 /*
 |--------------------------------------------------------------------------

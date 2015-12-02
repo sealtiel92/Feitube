@@ -2261,4 +2261,258 @@ class Ion_auth_model extends CI_Model
 		// just return the string IP address now for better compatibility
 		return $ip_address;
 	}
+
+	/**
+	* Obtiene email por id de usuario
+	* Params Id_user
+	**/
+	public function get_email($id = null)
+	{
+			$query = $this->db->select('email');
+			$query = $this->db->from('users');
+			$query = $this->db->where('id',$id);
+			$query = $this->db->get();
+			if ($query->num_rows() > 0)
+			{
+				return $query->result();
+			}
+			else
+				return null;
+	}
+
+	/**
+	* Obtiene todos los datos de un video
+	* Params
+	**/
+	public function get_ruta_video($id = null)
+	{
+		$query = $this->db->select('*');
+		$query = $this->db->from('video');
+		$query = $this->db->where('id_video',$id);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene los video restando el ID 
+	* Params id_video Limite
+	**/
+	public function get_videos_not_id($id = null, $limit = null)
+	{
+		$query = $this->db->from('video');
+		if($id != null)
+		{
+			$this->db->where('id_video !=', $id); 
+		}
+		else
+		{
+			if($limit != null)
+			{
+				$this->db->limit($limit); 
+			}
+		}
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene todos lo videos
+	* Params name limite
+	**/
+	public function get_videos_busqueda($name = null, $limit = null)
+	{
+		$query = $this->db->from('video');
+		if($name != null)
+		{
+			$this->db->like('name_video', $name); 
+		}
+		else
+		{
+			if($limit != null)
+			{
+				$this->db->limit($limit); 
+			}
+		}
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene los video de usuario
+	* Params ID_user
+	**/
+	public function get_videos_user($id_user)
+	{
+		$query = $this->db->from('video');
+		$query = $this->db->where('users_id',$id_user);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Agrega video
+	* Params
+	**/
+	public function guarda_video($data){
+		return $this->db->insert('video',$data);
+	}
+
+	/**
+	* Agrega comentario
+	* Params
+	**/
+	public function guarda_comentario($data){
+		$this->db->insert('comentario',$data);
+		return $this->db->insert_id();
+	}
+
+	/**
+	* Incrementa visita a un video
+	* Params ID
+	**/
+	public function incrementa_visita($id)
+	{
+		$this->db->query("UPDATE `video` SET `visitas`=`visitas`+1 WHERE id_video = ".$id);
+	}
+
+	/**
+	* aumenta not like a un video
+	* Params ID_video
+	**/
+	public function insert_like_m($id)
+	{
+		$this->db->query("UPDATE `video` SET `likes`=`likes`+1 WHERE id_video = ".$id);
+	}
+
+	/**
+	* aumenta not like a un video
+	* Params ID_video
+	**/
+	public function insert_not_like_m($id)
+	{
+		$this->db->query("UPDATE `video` SET `not_like`=`not_like`+1 WHERE id_video = ".$id);
+	}
+
+	/**
+	* Obtiene like si existe
+	* Params video user
+	**/
+	public function like_exists($video,$user)
+	{
+		$query = $this->db->select('*');
+		$query = $this->db->from('like');
+		$query = $this->db->where(array('id_video'=>$video,'id_users'=>$user));
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Agrega like entre video y usuario
+	* Params ID_video ID_usuario
+	**/
+	public function insert_like_user_video($id_video,$id_user)
+	{
+		$query = $this->db->insert('like',array('id_video'=>$id_video,'id_users'=>$id_user));
+	}
+
+	/**
+	* Obtiene comentarios
+	* Params
+	**/
+	public function get_comentarios_model()
+	{
+		$query = $this->db->from('comentario');
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene los like de un video 
+	* Params id bool
+	**/
+	public function get_like_m($id,$bool)
+	{
+		if($bool)
+		{
+			$query = $this->db->select('likes');
+		}else
+		{
+			$query = $this->db->select('not_like');
+		}
+		$query = $this->db->from('video');
+		$query = $this->db->where('id_video',$id);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene las visitas de video por id
+	* Params ID
+	**/
+	public function get_visitas_m($id)
+	{
+		$query = $this->db->select('visitas');
+		$query = $this->db->from('video');
+		$query = $this->db->where('id_video',$id);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
+	/**
+	* Obtiene los comentarios por id Video
+	* Params
+	**/
+	public function get_comentarios_id($id = null)
+	{
+		$query = $this->db->from('comentario');
+		$query = $this->db->where('video_id_video',$id);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0)
+		{
+			return $query->result();
+		}
+		else
+			return null;
+	}
+
 }

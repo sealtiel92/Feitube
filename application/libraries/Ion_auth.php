@@ -52,11 +52,8 @@ class Ion_auth
 	public $_cache_user_in_group;
 
 	/**
-	 * __construct
-	 *
-	 * @return void
-	 * @author Ben
-	 **/
+	* Constructor de la libreria 
+	**/
 	public function __construct()
 	{
 		$this->load->config('ion_auth', TRUE);
@@ -124,7 +121,6 @@ class Ion_auth
 	{
 		return get_instance()->$var;
 	}
-
 
 	/**
 	 * forgotten password feature
@@ -450,6 +446,235 @@ class Ion_auth
 		return null;
 	}
 
+	/**
+	* Obtiene del correo del usuario
+	* params ID
+	**/
+	public function get_user_email($id)
+	{
+		$email = $this->ion_auth_model->get_email($id);
+		foreach($email as $row)
+		{
+			$email = $row->email;
+		}
+		return $email;
+	}
+
+	/**
+	* Obtiene la ruta del video fisito para mostrar
+	**/
+	public function get_video_ruta($id)
+	{
+		$video = $this->ion_auth_model->get_ruta_video($id);
+		foreach($video as $row)
+		{
+			$ruta = $row->ruta;
+		}
+		if(isset($ruta))
+		{
+			return $ruta;
+		}else
+		return null;
+	}
+
+	/**
+	* Obtiene toda la informacion de un video
+	* params ID
+	**/
+	public function get_video($id)
+	{
+		$video = $this->ion_auth_model->get_ruta_video($id);
+		if(isset($video))
+		{
+			return $video;
+		}else
+		return null;
+	}
+
+	/**
+	* obtiene los video para mostrar excepto el que se reproduce
+	* params limite y id video
+	**/
+	public function get_videos_not_id($id = null, $limit = null)
+	{
+		if($id != null)
+		{
+			$videos = $this->ion_auth_model->get_videos_not_id($id, null);
+		}
+		if(isset($videos))
+		{
+			return $videos;
+		}else
+		return null;
+	}
+
+	/**
+	* obtiene videos con criterios de busqueda
+	* Params nombre, limite
+	**/
+	public function get_videos_busqueda($name = null, $limit = null)
+	{
+		if($name != null)
+		{
+			$videos = $this->ion_auth_model->get_videos_busqueda($name, null);
+		}
+		else
+		{
+			$videos = $this->ion_auth_model->get_videos_busqueda(null,$limit);
+		}
+
+		if(isset($videos))
+		{
+			return $videos;
+		}else
+		return null;
+	}
+
+	/**
+	* Obtiene los videos del usuario
+	* Params ID_user
+	**/
+	function get_videos_user($id_user)
+	{
+		$videos = $this->ion_auth_model->get_videos_user($id_user);
+		if(isset($videos))
+		{
+			return $videos;
+		}else
+		return null;
+	}
+
+	/**
+	* Obtiene los comentarios de los videos
+	* 
+	**/
+	public function get_comentarios()
+	{
+		$comentarios = $this->ion_auth_model->get_comentarios_model();
+		if(isset($comentarios))
+		{
+			return $comentarios;
+		}else
+		return null;
+	}
+
+	/**
+	* Obtiene comentarios por id de video
+	* 
+	**/
+	public function get_comentarios_id($id = null)
+	{
+		$comentarios = $this->ion_auth_model->get_comentarios_id($id);
+		if(isset($comentarios))
+		{
+			return $comentarios;
+		}else
+		return null;
+	}
+	
+	/**
+	* Inserta un video nuevo
+	* Params datos del video
+	**/
+	public function insert_video($data)
+	{
+		$this->ion_auth_model->guarda_video($data);
+	}
+
+	/**
+	* inserta un comentario en un video
+	* 
+	**/
+	public function insert_comentario($data)
+	{
+		$this->ion_auth_model->guarda_comentario($data);
+	}
+
+	/**
+	* incrementa la visita de un video
+	* Params ID video
+	**/
+	public function incrementa_visita($id)
+	{
+		$this->ion_auth_model->incrementa_visita($id);	
+	}
+
+	/**
+	* Agrega un like al video si es que no existe uno
+	* Params id_video id_user
+	**/
+	public function insert_like($id_video,$id_user)
+	{
+		if($this->get_like_exists($id_video,$id_user)== null)
+		{
+			$this->ion_auth_model->insert_like_m($id_video);
+			$this->insert_like_user_video($id_video,$id_user);	
+		}
+	}
+
+	/**
+	* Agrega no me gusta si es que no existe uno o este un like selecionado
+	* Params Id_user Id_video
+	**/
+	public function insert_not_like($id_video,$id_user)
+	{
+		if($this->get_like_exists($id_video,$id_user)== null)
+		{
+			$this->ion_auth_model->insert_not_like_m($id_video);
+			$this->insert_like_user_video($id_video,$id_user);
+		}
+	}
+
+	/**
+	* Obtiene los likes de un video
+	* Params Id_video y Bool
+	**/
+	public function get_likes_id($id_video,$bool)
+	{
+		$likes = $this->ion_auth_model->get_like_m($id_video,$bool);
+		if(isset($likes))
+		{
+			return $likes;
+		}else
+		return null;	
+	}
+
+	/**
+	* Comprueba si existe un like o not like entre usuario y video
+	* Params Video User
+	**/
+	public function get_like_exists($video,$user)
+	{
+		$like = $this->ion_auth_model->like_exists($video,$user);	
+		if(isset($like))
+		{
+			return $like;
+		}else
+		return null;	
+	}
+
+	/**
+	* Agrega relacion like entre usuario y Video
+	* Params id_user id_video
+	**/
+	public function insert_like_user_video($id_video,$id_user)
+	{
+		$this->ion_auth_model->insert_like_user_video($id_video,$id_user);
+	}
+
+	/**
+	* obtiene visitas de un video
+	* Params id_video
+	**/
+	public function get_visitas($id_video)
+	{
+		$visitas = $this->ion_auth_model->get_visitas_m($id_video);
+		if(isset($visitas))
+		{
+			return $visitas;
+		}else
+		return null;
+	}
 
 	/**
 	 * is_admin

@@ -49,8 +49,8 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'root';
-$db['default']['password'] = '';
+$db['default']['username'] = 'adm-feitube';
+$db['default']['password'] = ';:_[]1"#$%&';
 $db['default']['database'] = 'feitube';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
